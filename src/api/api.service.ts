@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
+import { map } from 'rxjs';
 
 @Injectable()
 export class ApiService {
   constructor(private httpService: HttpService) {}
-  private BASE_API = '';
+  private BASE_API = 'http://106.52.196.200:5700/';
   private async get(url: string, params?: any): Promise<any> {
     // const res = this.httpService
     //   .get(this.BASE_API + url, {
@@ -20,15 +21,18 @@ export class ApiService {
     // return res;
     return (
       await this.httpService
-        .get(this.BASE_API + url, {
+        .post(this.BASE_API + url, params, {
           headers: {
             Authorization: '1980285552',
           },
-          params,
         })
         .toPromise()
     ).data;
   }
+  async Axios_get(url: string, data: any = {}) {
+    return (await this.httpService.get(url, data).toPromise()).data;
+  }
+
   /**
    * 发送私聊信息
    * @param user_id 对方QQ号

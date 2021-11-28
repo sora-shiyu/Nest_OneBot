@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Controller, Post, Get, Body } from '@nestjs/common';
 import { getList } from './app.decorator';
-import { BotService } from './bot/bot.service';
+import { BotController } from './bot/bot.controller';
 
 @Controller()
 export class AppController {
-  constructor(private readonly bot: BotService) {}
+  constructor(private readonly bot: BotController) {}
   @Post()
   async getAllMessage(@Body() Body: any): Promise<string> {
     const { meta_event_type, post_type, sub_type } = Body;

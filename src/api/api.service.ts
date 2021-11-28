@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/axios';
 @Injectable()
 export class ApiService {
   constructor(private httpService: HttpService) {}
-  private BASE_API = 'http://106.52.196.200:5700/';
+  private BASE_API = '';
   private async get(url: string, params?: any): Promise<any> {
     // const res = this.httpService
     //   .get(this.BASE_API + url, {

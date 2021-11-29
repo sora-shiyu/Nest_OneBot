@@ -1,34 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { map } from 'rxjs';
+//修改api.config copy.ts 为api.config.ts
+import { config } from './api.config';
+import { lastValueFrom } from 'rxjs';
 
 @Injectable()
 export class ApiService {
   constructor(private httpService: HttpService) {}
-  private BASE_API = 'http://106.52.196.200:5700/';
-  private async get(url: string, params?: any): Promise<any> {
-    // const res = this.httpService
-    //   .get(this.BASE_API + url, {
-    //     headers: {
-    //       Authorization: '1980285552',
-    //     },
-    //   })
-    //   .pipe(
-    //     map((res) => {
-    //       return res.data;
-    //     }),
-    //   );
-    // return res;
-    return (
-      await this.httpService
-        .post(this.BASE_API + url, params, {
-          headers: {
-            Authorization: '1980285552',
-          },
-        })
-        .toPromise()
-    ).data;
+  private BASE_API = config.BASE_API;
+  private async post(url: string, params?: any): Promise<any> {
+    const postApi = this.httpService.post(this.BASE_API + url, params, {
+      headers: {
+        Authorization: config.Authorization,
+      },
+    });
+    return (await lastValueFrom(postApi)).data;
   }
+
   async Axios_get(url: string, data: any = {}) {
     return (await this.httpService.get(url, data).toPromise()).data;
   }
@@ -41,7 +29,7 @@ export class ApiService {
    * @returns message_id  消息 ID
    */
   async send_private_msg(user_id: number, message: string, group_id?: number) {
-    return await this.get('send_private_msg', { user_id, message, group_id });
+    return await this.post('send_private_msg', { user_id, message, group_id });
   }
   /**
    * 发送群聊信息
@@ -50,7 +38,7 @@ export class ApiService {
    * @returns message_id  消息 ID
    */
   async send_group_msg(group_id: number, message: string) {
-    return await this.get('send_group_msg', { group_id, message });
+    return await this.post('send_group_msg', { group_id, message });
   }
 
   /**
@@ -60,20 +48,7 @@ export class ApiService {
    * @returns message_id  消息 ID
    */
   async send_group_forward_msg(group_id: number, messages: any): Promise<void> {
-    return await this.get('send_group_forward_msg', { group_id, messages });
-    // return await this.apiService.send_group_forward_msg(647196450, {
-    //   type: 'node',
-    //   data: {
-    //     name: '火花',
-    //     uin: '1457947026',
-    //     content: [
-    //       {
-    //         type: 'text',
-    //         data: { text: '....' },
-    //       },
-    //     ],
-    //   },
-    // });
+    return await this.post('send_group_forward_msg', { group_id, messages });
   }
   /**
    * 撤回消息
@@ -81,13 +56,13 @@ export class ApiService {
    * @returns 无
    */
   async delete_msg(message_id: number) {
-    this.get('delete_msg', { message_id });
+    this.post('delete_msg', { message_id });
   }
   /**
    * 取登录信息
    * @returns 登录信息
    */
   async get_login_info() {
-    return await this.get('get_login_info');
+    return await this.post('get_login_info');
   }
 }

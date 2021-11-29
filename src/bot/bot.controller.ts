@@ -8,15 +8,10 @@ export class BotController {
   constructor(private readonly api: ApiService) {}
 
   @MsgPrivate(1)
-  async MsgPrivate1(data: privateMsg) {
-    const url =
-      'https://tva2.sinaimg.cn/large/0072Vf1pgy1foxk6pmjkjj31kw0w0b0v';
-    this.api.Axios_get(url, { responseType: 'arraybuffer' }).then((res) => {
-      const img_base64 = `base64://${Buffer.from(res).toString('base64')}`;
-      this.api.send_private_msg(1980285552, `[CQ:image,file=${img_base64}}]`);
+  MsgPrivate1(data: privateMsg) {
+    this.api.send_private_msg(1980285552, data.message).then((res) => {
+      console.log(res);
     });
-
-    //
   }
 
   // @MsgPrivate()
@@ -24,31 +19,48 @@ export class BotController {
   //   console.log('私聊处理2', data.message);
   // }
 
-  @MsgGroup()
-  MsgGroup1(data: GroupMsg) {
-    const text = '[CQ:at,qq=3168241647] 转发';
-    if (data.message.indexOf(text) !== -1) {
-      const resList = data.message.replace(text, '').trim().split(' ');
-      this.api.send_group_forward_msg(data.group_id, {
-        type: 'node',
-        data: {
-          name: resList[0],
-          uin: resList[1],
-          content: [
-            {
-              type: 'text',
-              data: { text: resList[2] },
-            },
-          ],
-        },
-      });
+  // @MsgGroup()
+  // MsgGroup1(data: GroupMsg) {}
+
+  @poke(1)
+  limitQQ(data: pokeMsg) {
+    if (data.user_id !== 1980285552) {
+      this.api.send_group_msg(data.group_id, '非法请求');
+      return 0;
     }
   }
 
   @poke()
   poke(data: pokeMsg) {
     if (data.target_id === 3168241647) {
-      this.api.send_group_msg(data.group_id, '#随机色图');
+      const url = 'https://api.lolicon.app/setu/v2?proxy=false&num=2';
+      this.api
+        .Axios_get(url)
+        .then((res) => {
+          return res.data.map((v) => {
+            return v.urls.original.replace('i.pximg.net', 'o.acgpic.net');
+          });
+        })
+        .then((img_Url: Array<string>) => {
+          img_Url.map((img_Url) => {
+            this.api
+              .Axios_get(img_Url, {
+                responseType: 'arraybuffer',
+                headers: {
+                  referer: 'https://pixivic.com/',
+                },
+              })
+              .then((res) => {
+                const img_base64 = `base64://${Buffer.from(res).toString(
+                  'base64',
+                )}`;
+                this.api.send_group_msg(
+                  data.group_id,
+                  `[CQ:image,file=${img_base64}]`,
+                );
+              });
+          });
+        });
     }
   }
 }
